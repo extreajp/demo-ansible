@@ -1,0 +1,10 @@
+---
+rocm_version_full: "7.2.70200-1"
+rocm_deb_filename: "amdgpu-install_{{ rocm_version_full }}_all.deb"
+rocm_base_url: "https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble"
+rocm_deb_url: "{{ rocm_base_url }}/{{ rocm_deb_filename }}"
+
+# 設定を適用したいユーザーのリスト
+rocm_target_users:
+  - "{{ ansible_user | default('ansible') }}"
+  - "user"

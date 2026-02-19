@@ -1,0 +1,5 @@
+---
+k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+qai_namespaces:
+  - qai-preprod
+  - qai-prod

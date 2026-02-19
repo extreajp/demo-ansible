@@ -1,0 +1,6 @@
+---
+- name: "Apply Common Base Configuration (Timezone & Boot Optimization)"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - common_setup

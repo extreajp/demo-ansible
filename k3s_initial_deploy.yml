@@ -1,0 +1,6 @@
+---
+- name: "Apply K3s Initial Configurations (Namespaces)"
+  hosts: kdsvr01
+  become: yes
+  roles:
+    - k3s_initial_tasks

@@ -1,0 +1,6 @@
+---
+longhorn_helm_version: 1.6.2
+longhorn_helm_namespace: longhorn-system
+longhorn_helm_replica_count: 3
+longhorn_helm_sds_network: "10.31.254.0/24"
+k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml

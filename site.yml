@@ -1,0 +1,16 @@
+---
+- import_playbook: kernel_update.yml
+- import_playbook: rocm_install.yml
+- import_playbook: network_assign.yml
+  tags: network
+- import_playbook: k3s_deploy.yml
+  tags: k3s
+- import_playbook: longhorn_deploy.yml
+- import_playbook: rancher_deploy.yml
+- import_playbook: aws_route_deploy.yml
+  tags: aws-connect
+- import_playbook: common_deploy.yml
+  tags: common
+- import_playbook: gpu_plugin_deploy.yml
+  tags: gpu
+- import_playbook: k3s_initial_deploy.yml

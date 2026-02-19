@@ -1,0 +1,41 @@
+---
+# [1] 環境変数の設定 (全ノード)
+- name: "Set HSA_OVERRIDE_GFX_VERSION"
+  lineinfile:
+    path: /etc/environment
+    line: 'HSA_OVERRIDE_GFX_VERSION="{{ hsa_override_version }}"'
+    state: present
+  register: env_update
+
+# [2] サービスの再起動 (変更時かつ本番時のみ)
+- name: "Restart K3s / K3s-Agent"
+  systemd:
+    name: "{{ 'k3s' if inventory_hostname in k3s_masters else 'k3s-agent' }}"
+    state: restarted
+  when: env_update.changed and not ansible_check_mode
+
+# [3] Helmリポジトリの登録
+- name: "Add AMD GPU Helm Repo"
+  kubernetes.core.helm_repository:
+    name: "{{ gpu_repo_name }}"
+    repo_url: "{{ gpu_repo_url }}"
+  delegate_to: kdsvr01
+  run_once: true
+
+# [4] 正しい名称でのインストール
+- name: "Install AMD GPU Device Plugin"
+  kubernetes.core.helm:
+    name: "{{ gpu_release_name }}"
+    chart_ref: "{{ gpu_chart_name }}"
+    release_namespace: kube-system
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    update_repo_cache: yes
+    wait: yes
+    values:
+      plugin:
+        env:
+          - name: HSA_OVERRIDE_GFX_VERSION
+            value: "{{ hsa_override_version }}"
+  delegate_to: kdsvr01
+  run_once: true
+  when: not ansible_check_mode

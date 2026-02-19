@@ -1,0 +1,20 @@
+---
+k3s_token: ***REMOVED***
+k3s_internal_interface: "enp196s0f0" # NIC1
+
+# コントロールパネル対象 (5台)
+k3s_control_plane_members:
+  - kdsvr01
+  - kdsvr02
+  - kdsvr03
+  - kdsvr04
+  - kdsvr05
+
+# 物理スイッチトポロジー
+k3s_switch_map:
+  kdsvr01: "switch1"
+  kdsvr03: "switch1"
+  kdsvr05: "switch1"
+  kdsvr02: "switch2"
+  kdsvr04: "switch2"
+  kdsvr06: "switch2"

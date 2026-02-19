@@ -1,0 +1,6 @@
+---
+- name: "Deploy K3s Cluster for Rancher Integration"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - k3s_setup

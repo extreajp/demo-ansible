@@ -1,0 +1,6 @@
+---
+- name: 内部ネットワーク (enp196s0f1) のIP付与
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - network_setup

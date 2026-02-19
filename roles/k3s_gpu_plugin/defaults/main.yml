@@ -1,0 +1,9 @@
+---
+hsa_override_version: "11.5.1"
+k3s_masters: [kdsvr01, kdsvr02, kdsvr03, kdsvr04, kdsvr05]
+
+# Helm関連 (実測値に基づき修正)
+gpu_repo_name: "amd-gpu"
+gpu_repo_url: "https://rocm.github.io/k8s-device-plugin/"
+gpu_chart_name: "amd-gpu/amd-gpu" # これが正解でした
+gpu_release_name: "amdgpu-device-plugin"

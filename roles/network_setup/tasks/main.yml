@@ -1,0 +1,15 @@
+---
+# 設定ファイルを配置
+- name: Create Netplan configuration for internal network
+  template:
+    src: 60-enp196s0f1.yaml.j2
+    dest: /etc/netplan/60-enp196s0f1.yaml
+    owner: root
+    group: root
+    mode: '0600'
+  register: netplan_config
+
+# 設定を反映 (ファイルの変更があった場合のみ実行)
+- name: Apply netplan configuration
+  command: netplan apply
+  when: netplan_config.changed

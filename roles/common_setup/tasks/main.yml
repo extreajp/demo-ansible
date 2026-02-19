@@ -1,0 +1,20 @@
+---
+# [1] タイムゾーン設定
+- name: "Task: Set timezone to Asia/Tokyo"
+  timezone:
+    name: Asia/Tokyo
+
+# [2] ネットワーク起動待ちの無効化 (DHCP待ちによる遅延対策)
+# インターフェースがオンラインになるのを待たずにブートを続行させます
+- name: "Task: Mask systemd-networkd-wait-online service"
+  systemd:
+    name: systemd-networkd-wait-online.service
+    masked: yes
+    enabled: no
+
+# 今後、共通で行いたい設定があればここに追記できます
+# 例: 日本語ロケールの生成など
+# - name: Generate ja_JP.UTF-8 locale
+#   locale_gen:
+#     name: ja_JP.UTF-8
+#     state: present

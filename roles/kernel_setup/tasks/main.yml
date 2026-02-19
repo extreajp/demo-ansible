@@ -1,0 +1,64 @@
+---
+# 1. カーネルパッケージのインストール
+- name: Install specific kernel packages (6.14.0-37)
+  apt:
+    name:
+      - linux-image-6.14.0-37-generic
+      - linux-headers-6.14.0-37-generic
+      - linux-modules-6.14.0-37-generic
+      - linux-modules-extra-6.14.0-37-generic
+      - linux-tools-6.14.0-37-generic
+    state: present
+    update_cache: yes
+
+# 2. カーネルのホールド設定
+- name: Set kernel packages to 'hold' state
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - linux-image-6.14.0-37-generic
+    - linux-headers-6.14.0-37-generic
+    - linux-modules-6.14.0-37-generic
+    - linux-modules-extra-6.14.0-37-generic
+    - linux-tools-6.14.0-37-generic
+
+# 3. 自動アップデート設定の無効化 (apt.conf.d)
+- name: Disable automatic updates in apt configuration
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "0";
+      APT::Periodic::Unattended-Upgrade "0";
+    owner: root
+    group: root
+    mode: '0644'
+
+# 4. unattended-upgrades サービスの停止と無効化
+- name: Stop and disable unattended-upgrades service
+  systemd:
+    name: unattended-upgrades
+    state: stopped
+    enabled: no
+
+# 5. スリープ・サスペンド系ターゲットのマスク
+- name: Mask sleep and suspend targets
+  systemd:
+    name: "{{ item }}"
+    masked: yes
+  loop:
+    - suspend.target
+    - sleep.target
+    - hybrid-sleep.target
+    - suspend-then-hibernate.target
+
+# 6. 現在のカーネル確認 (Dry-run時も実行)
+- name: Get current running kernel version
+  command: uname -r
+  register: current_kernel
+  changed_when: false
+  check_mode: no
+
+- name: Check system status
+  debug:
+    msg: "CURRENT KERNEL: {{ current_kernel.stdout }} | Target config applied. Reboot may be required."

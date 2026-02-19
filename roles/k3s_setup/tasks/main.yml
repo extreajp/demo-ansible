@@ -1,0 +1,78 @@
+---
+- name: "Task: Disable swap immediately"
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+  changed_when: true
+
+- name: "Task: Disable swap in fstab"
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\s+swap\s+.*)$'
+    replace: '# \1'
+
+- name: "Task: Install Longhorn and K3s dependencies"
+  apt:
+    name: [curl, nfs-common, open-iscsi]
+    state: present
+    update_cache: yes
+
+- name: "Task: Ensure iscsid is enabled"
+  systemd:
+    name: iscsid
+    enabled: yes
+    state: started
+
+- name: "Task: Load iscsi_tcp module (For Longhorn)"
+  modprobe:
+    name: iscsi_tcp
+    state: present
+
+- name: "Task: Ensure iscsi_tcp loads on boot"
+  copy:
+    content: "iscsi_tcp"
+    dest: /etc/modules-load.d/iscsi.conf
+
+- name: "Task: Disable multipathd (Conflict with Longhorn)"
+  systemd:
+    name: multipathd
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: "Task: Initialize primary master (kdsvr01) with TLS SAN"
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
+    --cluster-init \
+    --node-ip={{ ansible_host }} \
+    --flannel-iface={{ k3s_internal_interface }} \
+    --node-label "rack={{ k3s_switch_map[inventory_hostname] }}" \
+    --tls-san={{ ansible_host }} \
+    --write-kubeconfig-mode 644
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml
+  when: inventory_hostname == 'kdsvr01'
+
+- name: "Task: Join additional master nodes"
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
+    --server https://{{ hostvars['kdsvr01']['ansible_host'] }}:6443 \
+    --node-ip={{ ansible_host }} \
+    --flannel-iface={{ k3s_internal_interface }} \
+    --node-label "rack={{ k3s_switch_map[inventory_hostname] }}" \
+    --tls-san={{ ansible_host }} \
+    --write-kubeconfig-mode 644
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml
+  when:
+    - inventory_hostname in k3s_control_plane_members
+    - inventory_hostname != 'kdsvr01'
+
+- name: "Task: Join worker nodes"
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['kdsvr01']['ansible_host'] }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent \
+    --node-ip={{ ansible_host }} \
+    --flannel-iface={{ k3s_internal_interface }} \
+    --node-label "rack={{ k3s_switch_map[inventory_hostname] }}"
+  args:
+    creates: /etc/rancher/node-password.txt
+  when: inventory_hostname not in k3s_control_plane_members

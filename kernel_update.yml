@@ -1,0 +1,8 @@
+---
+- name: 複数サーバへのカーネル適用と固定
+  hosts: ubuntu_servers
+  become: yes
+  # 1台ずつ順番に実行したい場合は以下を有効にします（安全策）
+  # serial: 1
+  roles:
+    - kernel_setup

@@ -1,0 +1,61 @@
+---
+# [異常検知] URL確認
+- name: Check if the ROCm installer URL is accessible
+  uri:
+    url: "{{ rocm_deb_url }}"
+    method: HEAD
+  register: url_check
+  ignore_errors: yes
+  check_mode: no
+
+- name: Halt if the installer is missing
+  fail:
+    msg: "[ERROR] ROCm installer NOT FOUND at: {{ rocm_deb_url }}"
+  when: url_check.status is not defined or url_check.status != 200
+
+# [配置・実行]
+- name: Download amdgpu-install deb package
+  get_url:
+    url: "{{ rocm_deb_url }}"
+    dest: "/tmp/{{ rocm_deb_filename }}"
+    mode: '0644'
+
+- name: Install amdgpu-install package
+  apt:
+    deb: "/tmp/{{ rocm_deb_filename }}"
+    state: present
+
+- name: Run amdgpu-install for ROCm (no-dkms)
+  command: amdgpu-install -y --usecase=rocm --no-dkms
+  args:
+    creates: /opt/rocm/bin/rocminfo
+
+# [権限] ユーザーごとにループ
+- name: Add users to render and video groups
+  user:
+    name: "{{ item }}"
+    groups: video,render
+    append: yes
+  loop: "{{ rocm_target_users }}"
+
+# [設定] blockinfileでユーザーごとに一括書き込み（ここを修正！）
+- name: Configure .bashrc for all ROCm users
+  blockinfile:
+    path: "/home/{{ item }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: ROCm Settings"
+    insertafter: EOF
+    block: |
+      export HSA_OVERRIDE_GFX_VERSION=11.5.1
+      #export PYTORCH_ALLOC_CONF=expandable_segments:True,garbage_collection_threshold:0.8,max_split_size_mb:512
+      #export HSA_ENABLE_SDMA=0
+      #export HSA_USE_SVM=0
+      #export HIP_VISIBLE_DEVICES=0
+  loop: "{{ rocm_target_users }}"
+
+# [検証]
+- name: Verify ROCm installation
+  command: /opt/rocm/bin/rocminfo
+  register: rocminfo_out
+  changed_when: false
+  failed_when: false
+  check_mode: no

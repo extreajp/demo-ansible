@@ -1,0 +1,6 @@
+---
+- name: ROCm 7.2 のインストールと環境設定
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - rocm_setup

@@ -1,0 +1,6 @@
+---
+- name: "Step 3: Deploy Rancher HA (v2.10.11 Compatibility)"
+  hosts: kdsvr01
+  become: yes
+  roles:
+    - rancher_setup

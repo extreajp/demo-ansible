@@ -1,0 +1,6 @@
+---
+- name: "Deploy AMD GPU Device Plugin (Simple)"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - k3s_gpu_plugin

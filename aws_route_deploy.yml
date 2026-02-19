@@ -1,0 +1,6 @@
+---
+- name: "Deploy Static Route for AWS VPC Connectivity"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - aws_vpc_route

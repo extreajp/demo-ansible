@@ -1,0 +1,13 @@
+---
+- name: "Task: Create Netplan config for AWS VPC (10.3.0.0/16)"
+  template:
+    src: 61-aws-vpc-route.yaml.j2
+    dest: /etc/netplan/61-aws-vpc-route.yaml
+    owner: root
+    group: root
+    mode: '0600'
+  register: netplan_aws_config
+
+- name: "Task: Apply Netplan to enable AWS VPC route"
+  command: netplan apply
+  when: netplan_aws_config.changed
