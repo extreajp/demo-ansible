@@ -1,5 +1,5 @@
 ---
-k3s_token: ***REMOVED***
+#k3s_token: read group_vars
 k3s_internal_interface: "enp196s0f0" # NIC1
 
 # コントロールパネル対象 (5台)

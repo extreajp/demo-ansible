@@ -41,7 +41,7 @@
 
 - name: "Task: Initialize primary master (kdsvr01) with TLS SAN"
   shell: |
-    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
+    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token | mandatory }} sh -s - server \
     --cluster-init \
     --node-ip={{ ansible_host }} \
     --flannel-iface={{ k3s_internal_interface }} \
@@ -54,7 +54,7 @@
 
 - name: "Task: Join additional master nodes"
   shell: |
-    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
+    curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token | mandatory }} sh -s - server \
     --server https://{{ hostvars['kdsvr01']['ansible_host'] }}:6443 \
     --node-ip={{ ansible_host }} \
     --flannel-iface={{ k3s_internal_interface }} \
@@ -69,7 +69,7 @@
 
 - name: "Task: Join worker nodes"
   shell: |
-    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['kdsvr01']['ansible_host'] }}:6443 K3S_TOKEN={{ k3s_token }} sh -s - agent \
+    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['kdsvr01']['ansible_host'] }}:6443 K3S_TOKEN={{ k3s_token | mandatory }} sh -s - agent \
     --node-ip={{ ansible_host }} \
     --flannel-iface={{ k3s_internal_interface }} \
     --node-label "rack={{ k3s_switch_map[inventory_hostname] }}"
