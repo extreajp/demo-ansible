@@ -9,8 +9,6 @@
   tags: k3s_deploy
 - import_playbook: longhorn_deploy.yml
   tags: longhorn_deploy
-- import_playbook: rancher_deploy.yml
-  tags: rancher_deploy
 - import_playbook: aws_route_deploy.yml
   tags: aws_route_deploy
 - import_playbook: common_deploy.yml
