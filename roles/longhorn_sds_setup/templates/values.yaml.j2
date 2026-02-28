@@ -1,5 +1,5 @@
 defaultSettings:
-  storageNetwork: "{{ longhorn_helm_sds_network }}"
+  storageNetwork: "{{ longhorn_helm_namespace }}/{{ longhorn_helm_sds_network_name }}"
   replicaSoftAntiAffinity: false
   replicaZoneSoftAntiAffinity: true
   defaultReplicaCount: {{ longhorn_helm_replica_count }}

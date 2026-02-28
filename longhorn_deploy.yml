@@ -1,6 +1,0 @@
----
-- name: "Deploy Longhorn SDS with 3 Replicas (Step 2)"
-  hosts: kdsvr01
-  become: yes
-  roles:
-    - longhorn_helm

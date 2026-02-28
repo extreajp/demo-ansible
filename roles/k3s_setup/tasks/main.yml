@@ -32,12 +32,15 @@
     content: "iscsi_tcp"
     dest: /etc/modules-load.d/iscsi.conf
 
-- name: "Task: Disable multipathd (Conflict with Longhorn)"
+- name: "Task: Disable multipathd and socket (Conflict with Longhorn)"
   systemd:
-    name: multipathd
+    name: "{{ item }}"
     state: stopped
     enabled: no
   ignore_errors: yes
+  loop:
+    - multipathd.socket
+    - multipathd.service
 
 - name: "Task: Initialize primary master (kdsvr01) with TLS SAN"
   shell: |
@@ -74,5 +77,5 @@
     --flannel-iface={{ k3s_internal_interface }} \
     --node-label "rack={{ k3s_switch_map[inventory_hostname] }}"
   args:
-    creates: /etc/rancher/node-password.txt
+    creates: /etc/rancher/node/password
   when: inventory_hostname not in k3s_control_plane_members

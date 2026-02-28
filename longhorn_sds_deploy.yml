@@ -1,0 +1,5 @@
+---
+- hosts: ubuntu_servers
+  become: yes
+  roles:
+    - longhorn_sds_setup
