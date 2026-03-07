@@ -33,16 +33,18 @@
     update_repo_cache: yes
     values:
       config:
+        fullnameOverride: multus
         cni_conf:
-          confDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
-          binDir: /var/lib/rancher/k3s/data/current/bin/
-          kubeconfig: /var/lib/rancher/k3s/agent/etc/cni/net.d/multus.d/multus.kubeconfig
+          confDir: "{{ multus_conf_dir }}"
+          binDir: "{{ multus_bin_dir }}"
+          kubeconfig: "{{ multus_kubeconfig_path }}"
+          multusAutoconfigDir: "{{ multus_autoconfig_dir }}"
       rke2-whereabouts:
         fullnameOverride: whereabouts
         enabled: true
         cniConf:
-          confDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
-          binDir: /var/lib/rancher/k3s/data/current/bin/
+          confDir: "{{ multus_conf_dir }}"
+          binDir: "{{ multus_bin_dir }}"
     wait: yes
   run_once: true
   delegate_to: "{{ k8s_delegate_host }}"
@@ -60,7 +62,7 @@
         config: "{{ nad_config_content | to_json }}"
   vars:
     nad_config_content:
-      cniVersion: "0.3.1"
+      cniVersion: "{{ nad_cni_version }}"
       name: "{{ longhorn_helm_sds_network_name }}"
       type: macvlan
       master: "{{ longhorn_helm_sds_interface }}"
@@ -68,6 +70,8 @@
       ipam:
         type: whereabouts
         range: "{{ longhorn_helm_sds_network_cidr }}"
+        range_start: "{{ longhorn_helm_sds_pod_range_start }}"
+        range_end: "{{ longhorn_helm_sds_pod_range_end }}"
         configuration_path: /var/lib/rancher/k3s/agent/etc/cni/net.d/whereabouts.d/whereabouts.conf
   run_once: true
   delegate_to: "{{ k8s_delegate_host }}"

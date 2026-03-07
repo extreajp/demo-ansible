@@ -2,7 +2,14 @@
 longhorn_helm_namespace: longhorn-system
 longhorn_helm_sds_network_name: "longhorn-storage-network"
 longhorn_helm_sds_network_cidr: "10.31.254.0/24"
+longhorn_helm_sds_pod_range_start: "10.31.254.51"
+longhorn_helm_sds_pod_range_end: "10.31.254.99"
 longhorn_helm_sds_interface: "enp196s0f1"
+multus_conf_dir: /var/lib/rancher/k3s/agent/etc/cni/net.d
+multus_bin_dir: /var/lib/rancher/k3s/data/cni/
+multus_autoconfig_dir: /var/lib/rancher/k3s/agent/etc/cni/net.d
+multus_kubeconfig_path: /var/lib/rancher/k3s/agent/etc/cni/net.d/multus.d/multus.kubeconfig
+nad_cni_version: "1.0.0"
 k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
 multus_repo_name: "rke2-charts"
 multus_repo_url: "https://rke2-charts.rancher.io"
