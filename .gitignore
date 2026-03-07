@@ -1,4 +1,7 @@
 # ignore ansible file
-*.retry        # Ansible実行失敗時のリトライファイル
-.vault_pass    # パスワードを直書きしたファイル（もし使う場合）
-tmp/           # tmpディレクトリ
+## Ansible実行失敗時のリトライファイル
+*.retry
+## パスワードを直書きしたファイル（もし使う場合）
+.vault_pass
+## tmpディレクトリ
+tmp/
