@@ -19,7 +19,7 @@ This repository manages:
 
 - Inventory file: `inventories/production/hosts.ini`
 - Main host group: `ubuntu_servers`
-- Primary control-plane node used by delegated tasks: `kdsvr01`
+- Primary control-plane node used by delegated tasks: `{{ k8s_delegate_host }}` (defined in `group_vars/all/common.yml`)
 
 ## Entry Point
 
@@ -40,7 +40,7 @@ This repository manages:
 - Ansible installed on the control machine
 - Required collections/modules available (for example `kubernetes.core`)
 - SSH access from control machine to inventory hosts
-- Vault secret available for `group_vars/all.yml` (contains `k3s_token`)
+- Vault secret available for `group_vars/all/k3s_tokens.yml` (contains `k3s_token`)
 
 ## Validation
 
@@ -78,5 +78,5 @@ ansible-playbook -i inventories/production/hosts.ini site.yml --tags longhorn_sd
 
 ## Notes
 
-- In `longhorn_sds_deploy`, many Kubernetes operations run with `run_once` and are delegated to `kdsvr01`.
+- In `longhorn_sds_deploy`, many Kubernetes operations run with `run_once` and are delegated to `{{ k8s_delegate_host }}`.
 - `roles/longhorn_sds_setup` includes a task to remove the default flag from `local-path` StorageClass.

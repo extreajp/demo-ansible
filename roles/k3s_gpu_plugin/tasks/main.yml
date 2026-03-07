@@ -19,7 +19,7 @@
   kubernetes.core.helm_repository:
     name: "{{ gpu_repo_name }}"
     repo_url: "{{ gpu_repo_url }}"
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
   run_once: true
 
 # [4] 正しい名称でのインストール
@@ -36,6 +36,6 @@
         env:
           - name: HSA_OVERRIDE_GFX_VERSION
             value: "{{ hsa_override_version }}"
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
   run_once: true
   when: not ansible_check_mode

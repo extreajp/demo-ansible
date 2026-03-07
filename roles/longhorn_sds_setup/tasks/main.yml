@@ -14,7 +14,7 @@
         name: "{{ longhorn_helm_namespace }}"
     state: present
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 3: Add RKE2 Helm repository"
   kubernetes.core.helm_repository:
@@ -22,7 +22,7 @@
     repo_url: "{{ multus_repo_url }}"
     state: present
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 4: Deploy Multus and Whereabouts via RKE2 Helm Chart"
   kubernetes.core.helm:
@@ -45,7 +45,7 @@
           binDir: /var/lib/rancher/k3s/data/current/bin/
     wait: yes
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 5: Create NetworkAttachmentDefinition for 10G SDS (Handle 422 Error)"
   kubernetes.core.k8s:
@@ -70,7 +70,7 @@
         range: "{{ longhorn_helm_sds_network_cidr }}"
         configuration_path: /var/lib/rancher/k3s/agent/etc/cni/net.d/whereabouts.d/whereabouts.conf
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 6: Deploy Longhorn v1.11.0 via Helm"
   kubernetes.core.helm:
@@ -85,7 +85,7 @@
     timeout: "600s"
   register: longhorn_helm_result
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 7: Remove default status from local-path StorageClass"
   kubernetes.core.k8s:
@@ -100,11 +100,11 @@
     state: patched
   ignore_errors: yes
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
 
 - name: "Step 8: Restart Longhorn Manager pods to apply network"
   shell: "kubectl delete pod -n {{ longhorn_helm_namespace }} -l app=longhorn-manager"
   ignore_errors: yes
   when: longhorn_helm_result is changed
   run_once: true
-  delegate_to: kdsvr01
+  delegate_to: "{{ k8s_delegate_host }}"
