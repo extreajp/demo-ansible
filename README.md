@@ -29,7 +29,8 @@ This repository manages:
   - `rocm_install.yml` -> `rocm_install`
   - `network_assign.yml` -> `network_assign`
   - `k3s_deploy.yml` -> `k3s_deploy`
-  - `longhorn_sds_deploy.yml` -> `longhorn_sds_deploy`
+  - `multus_deploy.yml` -> `multus_deploy`
+  - `longhorn_deploy.yml` -> `longhorn_deploy`
   - `aws_route_deploy.yml` -> `aws_route_deploy`
   - `common_deploy.yml` -> `common_deploy`
   - `gpu_plugin_deploy.yml` -> `gpu_plugin_deploy`
@@ -70,13 +71,19 @@ Run only K3s deployment:
 ansible-playbook -i inventories/production/hosts.ini site.yml --tags k3s_deploy
 ```
 
-Run only Longhorn SDS deployment:
+Run only Multus/Whereabouts + NAD deployment:
 
 ```bash
-ansible-playbook -i inventories/production/hosts.ini site.yml --tags longhorn_sds_deploy
+ansible-playbook -i inventories/production/hosts.ini site.yml --tags multus_deploy
+```
+
+Run only Longhorn deployment:
+
+```bash
+ansible-playbook -i inventories/production/hosts.ini site.yml --tags longhorn_deploy
 ```
 
 ## Notes
 
-- In `longhorn_sds_deploy`, many Kubernetes operations run with `run_once` and are delegated to `{{ k8s_delegate_host }}`.
-- `roles/longhorn_sds_setup` includes a task to remove the default flag from `local-path` StorageClass.
+- In `multus_deploy.yml` and `longhorn_deploy.yml`, many Kubernetes operations run with `run_once` and are delegated to `{{ k8s_delegate_host }}`.
+- `roles/longhorn_setup` includes a task to remove the default flag from `local-path` StorageClass.

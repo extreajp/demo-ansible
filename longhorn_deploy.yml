@@ -1,0 +1,6 @@
+---
+- name: "Deploy Longhorn"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - longhorn_setup

@@ -1,0 +1,6 @@
+---
+- name: "Deploy Multus and Whereabouts (with NAD)"
+  hosts: ubuntu_servers
+  become: yes
+  roles:
+    - multus_setup

@@ -1,0 +1,37 @@
+---
+- name: "Step 6: Deploy Longhorn v1.11.0 via Helm"
+  kubernetes.core.helm:
+    name: longhorn
+    chart_ref: longhorn/longhorn
+    chart_version: "{{ longhorn_helm_version }}"
+    release_namespace: "{{ longhorn_helm_namespace }}"
+    create_namespace: yes
+    kubeconfig: "{{ k3s_kubeconfig_path }}"
+    values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
+    wait: yes
+    timeout: "600s"
+  register: longhorn_helm_result
+  run_once: true
+  delegate_to: "{{ k8s_delegate_host }}"
+
+- name: "Step 7: Remove default status from local-path StorageClass"
+  kubernetes.core.k8s:
+    kubeconfig: "{{ k3s_kubeconfig_path }}"
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: local-path
+        annotations:
+          storageclass.kubernetes.io/is-default-class: "false"
+    state: patched
+  ignore_errors: yes
+  run_once: true
+  delegate_to: "{{ k8s_delegate_host }}"
+
+- name: "Step 8: Restart Longhorn Manager pods to apply network"
+  shell: "kubectl delete pod -n {{ longhorn_helm_namespace }} -l app=longhorn-manager"
+  ignore_errors: yes
+  when: longhorn_helm_result is changed
+  run_once: true
+  delegate_to: "{{ k8s_delegate_host }}"
