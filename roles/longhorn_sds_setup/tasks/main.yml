@@ -16,43 +16,38 @@
   run_once: true
   delegate_to: kdsvr01
 
-- name: "Step 3: Deploy Multus and Whereabouts via RKE2 Helm Chart"
+- name: "Step 3: Add RKE2 Helm repository"
+  kubernetes.core.helm_repository:
+    name: "{{ multus_repo_name }}"
+    repo_url: "{{ multus_repo_url }}"
+    state: present
+  run_once: true
+  delegate_to: kdsvr01
+
+- name: "Step 4: Deploy Multus and Whereabouts via RKE2 Helm Chart"
   kubernetes.core.helm:
     name: multus
     chart_ref: rke2-charts/rke2-multus
     release_namespace: kube-system
     kubeconfig: "{{ k3s_kubeconfig_path }}"
+    update_repo_cache: yes
     values:
       config:
         cni_conf:
           confDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
-          binDir: /var/lib/rancher/k3s/data/cni
+          binDir: /var/lib/rancher/k3s/data/current/bin/
           kubeconfig: /var/lib/rancher/k3s/agent/etc/cni/net.d/multus.d/multus.kubeconfig
-          multusAutoconfigDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
-
-        daemon_conf: |
-          {
-            "chrootDir": "/hostroot",
-            "cniVersion": "0.3.1",
-            "logLevel": "verbose",
-            "logToStderr": true,
-            "cniConfigDir": "/host/var/lib/rancher/k3s/agent/etc/cni/net.d",
-            "multusAutoconfigDir": "/host/var/lib/rancher/k3s/agent/etc/cni/net.d",
-            "multusConfigFile": "auto",
-            "socketDir": "/host/run/multus/"
-          }
       rke2-whereabouts:
         fullnameOverride: whereabouts
         enabled: true
         cniConf:
           confDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
-          binDir: /var/lib/rancher/k3s/data/cni
-
+          binDir: /var/lib/rancher/k3s/data/current/bin/
     wait: yes
   run_once: true
   delegate_to: kdsvr01
 
-- name: "Step 4: Create NetworkAttachmentDefinition for 10G SDS (Handle 422 Error)"
+- name: "Step 5: Create NetworkAttachmentDefinition for 10G SDS (Handle 422 Error)"
   kubernetes.core.k8s:
     kubeconfig: "{{ k3s_kubeconfig_path }}"
     definition:
@@ -73,13 +68,11 @@
       ipam:
         type: whereabouts
         range: "{{ longhorn_helm_sds_network_cidr }}"
-        datastore: "kubernetes"
-        kubernetes:
-          kubeconfig: /var/lib/rancher/k3s/agent/etc/cni/net.d/whereabouts.d/whereabouts.kubeconfig
+        configuration_path: /var/lib/rancher/k3s/agent/etc/cni/net.d/whereabouts.d/whereabouts.conf
   run_once: true
   delegate_to: kdsvr01
 
-- name: "Step 5: Deploy Longhorn v1.11.0 via Helm"
+- name: "Step 6: Deploy Longhorn v1.11.0 via Helm"
   kubernetes.core.helm:
     name: longhorn
     chart_ref: longhorn/longhorn
@@ -94,7 +87,7 @@
   run_once: true
   delegate_to: kdsvr01
 
-- name: "Step 6: Remove default status from local-path StorageClass"
+- name: "Step 7: Remove default status from local-path StorageClass"
   kubernetes.core.k8s:
     kubeconfig: "{{ k3s_kubeconfig_path }}"
     definition:
@@ -109,7 +102,7 @@
   run_once: true
   delegate_to: kdsvr01
 
-- name: "Step 7: Restart Longhorn Manager pods to apply network"
+- name: "Step 8: Restart Longhorn Manager pods to apply network"
   shell: "kubectl delete pod -n {{ longhorn_helm_namespace }} -l app=longhorn-manager"
   ignore_errors: yes
   when: longhorn_helm_result is changed
