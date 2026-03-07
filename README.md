@@ -87,3 +87,4 @@ ansible-playbook -i inventories/production/hosts.ini site.yml --tags longhorn_de
 
 - In `multus_deploy.yml` and `longhorn_deploy.yml`, many Kubernetes operations run with `run_once` and are delegated to `{{ k8s_delegate_host }}`.
 - `roles/longhorn_setup` includes a task to remove the default flag from `local-path` StorageClass.
+- In `roles/multus_setup`, NAD/Whereabouts IP allocation is constrained with `range_start`/`range_end` (default: `10.31.254.51`-`10.31.254.99`).
